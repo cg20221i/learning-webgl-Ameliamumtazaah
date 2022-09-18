@@ -7,4 +7,4 @@
 Choosen Letters :
 | **Numbers** | **Alphabets** |
 |-------------|---------------|
-|28|AH|
+|      28     |       AH      |
