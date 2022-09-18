@@ -1,8 +1,8 @@
 # Submission Details
 
-***Amelia Mumtazah Karimah***
+Amelia Mumtazah Karimah
 
-***5025201128***
+5025201128
 
 ## Choosen Letters 
 | **Numbers** | **Alphabets** |
