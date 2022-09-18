@@ -1,6 +1,7 @@
-# Submission Detaila
+# Submission Details
 
 Amelia Mumtazah Karimah 
+
 5025201128
 
 | **Numbers** | **Alphabets** |
