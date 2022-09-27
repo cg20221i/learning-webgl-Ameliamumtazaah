@@ -3,17 +3,17 @@ function main() {
     var gl = canvas.getContext("webgl");
 
     /**
-     * A (  0.5,  0.5)  Red     (1.0, 0.0, 0.0)
-     * B (  0.0,  0.0)  Green   (0.0, 1.0, 0.0)
-     * C ( -0.5,  0.5)  Blue    (0.0, 0.0, 1.0)
-     * D (  0.0,  1.0)  Black   (0.0, 0.0, 0.0)
+     * A (  0.5,  0.0)  Red     (1.0, 0.0, 0.0)
+     * B (  0.0, -0.5)  Green   (0.0, 1.0, 0.0)
+     * C ( -0.5,  0.0)  Blue    (0.0, 0.0, 1.0)
+     * D (  0.0,  0.5)  Black   (0.0, 0.0, 0.0)
      */
 
     var vertices = [
-        0.5, 0.5, 1.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 1.0, 0.0,
-        -0.5, 0.5, 0.0, 0.0, 1.0,
-        0.0, 1.0, 0.0, 0.0, 0.0
+        0.5, 0.0, 1.0, 0.0, 0.0,
+        0.0, -0.5, 0.0, 1.0, 0.0,
+        -0.5, 0.0, 0.0, 0.0, 1.0,
+        0.0, 0.5, 0.0, 0.0, 0.0
     ];
 
     // Create a linked-list for storing the vertices data in the GPU realm
@@ -26,13 +26,15 @@ function main() {
         attribute vec2 aPosition;
         attribute vec3 aColor;
         uniform float uTheta;
+        uniform float uDX;
+        uniform float uDY;
         varying vec3 vColor;
         void main () {
             //gl_PointSize = 15.0;
             vec2 position = vec2(aPosition);
             position.x = -sin(uTheta) * aPosition.x + cos(uTheta) * aPosition.y;
             position.y = sin(uTheta) * aPosition.y + cos(uTheta) * aPosition.x;
-            gl_Position = vec4(position, 0.0, 1.0);
+            gl_Position = vec4(position.x + uDX, position.y + uDY, 0.0, 1.0);
             // gl_Position is the final destination for storing
             //  positional data for the rendered vertex
             vColor = aColor;
@@ -68,10 +70,52 @@ function main() {
     gl.useProgram(shaderProgram);
 
     // Local variables
+    var isAnimated = false;
     var theta = 0.0;
+    var direction = "";
+    var dX = 0.0;
+    var dY = 0.0;
+
+    // Local functions
+    function onMouseClick (event) {
+        isAnimated = !isAnimated;
+    }
+    function onKeyDown (event) {
+        if (event.keyCode == 32) {  // Space button
+            isAnimated = true;
+        }
+        switch (event.keyCode) {
+            case 38: // UP
+                direction = "up";
+                break;
+            case 40: // DOWN
+                direction = "down";
+                break;
+            case 39: // RIGHT
+                direction = "right";
+                break;
+            case 37: // LEFT
+                direction = "left";
+                break;
+            default:
+                break;
+        }
+    }
+    function onKeyUp (event) {
+        if (event.keyCode == 32) {  // Space button
+            isAnimated = false;
+        }
+        //console.log("keyup");
+        direction = "";
+    }
+    document.addEventListener("click", onMouseClick);
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
 
     // All the qualifiers needed by shaders
     var uTheta = gl.getUniformLocation(shaderProgram, "uTheta");
+    var uDX = gl.getUniformLocation(shaderProgram, "uDX");
+    var uDY = gl.getUniformLocation(shaderProgram, "uDY");
 
     // Teach the GPU how to collect
     //  the positional values from ARRAY_BUFFER
@@ -99,8 +143,31 @@ function main() {
         gl.clearColor(1.0, 0.75,   0.79,  1.0);
                 //Red, Green, Blue, Alpha
         gl.clear(gl.COLOR_BUFFER_BIT);
-        theta += 0.01;
-        gl.uniform1f(uTheta, theta);
+        if (isAnimated) {
+            theta += 0.01;
+            gl.uniform1f(uTheta, theta);
+        }
+        switch (direction) {
+            case "up":
+                dY += 0.1;
+                gl.uniform1f(uDY, dY);
+                break;
+            case "down":
+                dY -= 0.1;
+                gl.uniform1f(uDY, dY);
+                break;
+            case "left":
+                dX -= 0.1;
+                gl.uniform1f(uDX, dX);
+                break;
+            case "right":
+                dX += 0.1;
+                gl.uniform1f(uDX, dX);
+                break;
+        
+            default:
+                break;
+        }
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
         requestAnimationFrame(render);
     }
